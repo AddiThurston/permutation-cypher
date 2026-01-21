@@ -41,8 +41,8 @@ int readToString(string& s, string fileName) {
     return 0;
 }
 
-// reads the frequency of letters to a map
-void getCharFreq(string& s, vector<pair<char, int> >& freq) {
+// reads the frequency of letters in the ciphertext to a vector
+void setCipherFreq(string& s, vector<pair<char, int> >& freq) {
     map<char, int> freqMap;
     // initialize the frequency of the characters to 0
     for (char c = 'A'; c <= 'Z'; c++) {
@@ -55,9 +55,28 @@ void getCharFreq(string& s, vector<pair<char, int> >& freq) {
     for (const auto& p : freqMap) {
         freq.push_back({p.first, p.second});
     }
-    
+
 }
 
+// reads the frequency of letters in the dictionary to a vector
+void setDictFreq(unordered_set<string>& dict, vector<pair<char, int> >& freq) {
+    map<char, int> freqMap;
+    // initialize the frequency of the characters to 0
+    for (char c = 'A'; c <= 'Z'; c++) {
+        freqMap.insert({c, 0});
+    }
+
+    for (const auto& word : dict){
+        for (char c : word) {
+            freqMap[toupper(c)]++; // increment the frequency of the current character by 1;
+        }
+    }
+    for (const auto& p : freqMap) {
+        freq.push_back({p.first, p.second});
+    }
+}
+
+// determines the character with the higher frequency to be greater
 bool freqSort(pair<char, int>& a, pair<char, int>& b) {
     return a.second > b.second;
 }
@@ -66,6 +85,7 @@ int main() {
     unordered_set<string> dict; // the dictionary from dictionary.txt
     string ciphertext;  // the ciphertext from ciphertext.txt
     vector<pair<char, int> > cipherFreq; // the frequency of all letters in the ciphertext
+    vector<pair<char, int> > dictFreq;  // the frequency of all letters in the dictionary
 
     if (readToSet(dict, "dictionary.txt") == -1) {
         return 1;
@@ -77,9 +97,12 @@ int main() {
     }
     cout << "Done reading ciphertext file\n";
 
-    getCharFreq(ciphertext, cipherFreq);
+    setCipherFreq(ciphertext, cipherFreq);
     cout << "Done counting frequencies of ciphertext letters\n";
     sort(cipherFreq.begin(), cipherFreq.end(), freqSort);
+    setDictFreq(dict, dictFreq);
+    cout << "Done counting frequencies of dictionary letters\n";
+    sort(dictFreq.begin(), dictFreq.end(), freqSort);
     for (const auto& pair : cipherFreq) {
         std::cout << pair.first << " - " << pair.second << std::endl;
     }
