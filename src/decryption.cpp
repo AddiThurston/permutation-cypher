@@ -89,6 +89,22 @@ string decrypt(string& ciphertext, string& key) {
     return plaintext;
 }
 
+
+size_t countMatches(const string& text, const unordered_set<string>& dict){
+	size_t count = 0;
+	for(const auto& word : dict){
+		if(word.empty()) continue;
+		if(word.size() > text.size()) continue;
+
+		if(text.find(word) != string::npos){
+			++count;
+		}
+	}
+	return count;
+}
+
+
+
 int main() {
     unordered_set<string> dict; // the dictionary from dictionary.txt
     string ciphertext;  // the ciphertext from ciphertext.txt
@@ -127,5 +143,9 @@ int main() {
     }
     cout << decrypt(ciphertext, key) << endl;
     
+
+    cout << countMatches(ciphertext, dict) << endl;
+
+
     return 0;
 }
