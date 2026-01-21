@@ -88,7 +88,7 @@ size_t countMatches(const string& text, const unordered_set<string>& dict){
 		if(word.size() > text.size()) continue;
 
 		if(text.find(word) != string::npos){
-			count += word.length()*word.length();
+			count++;
 		}
 	}
 	return count;
