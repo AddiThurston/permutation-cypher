@@ -112,8 +112,6 @@ size_t countMatches(const string& text, const unordered_set<string>& dict){
 	return count;
 }
 
-
-
 int main() {
     unordered_set<string> dict; // the dictionary from dictionary.txt
     string ciphertext;  // the ciphertext from ciphertext.txt
@@ -144,17 +142,33 @@ int main() {
         std::cout << pair.first << " - " << pair.second << std::endl;
     }
 
-    string commonTextFreq = "ETAINOSRHDCMLPUGWFYBVJKXQZ";
+    string commonTextFreq = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
     // correct frequency chart - "ETAINOSRHDCMLPUGWFYBVJKXQZ"
     string key(26, ' ');
     for (int i = 0; i < 26; i++) {
         key[cipherFreq[i].first - 'A'] = commonTextFreq[i];
-    }
-    cout << decrypt(ciphertext, key) << endl;
+    }    
     
 
-    cout << countMatches(ciphertext, dict) << endl;
+    cout << decrypt(ciphertext, key) << endl;
 
+    string input;
+    getline(cin, input);
+    while (input != "2") {
+        if (input == "1") {
+            cout << "Which characters do you want to swap?\n";
+            char a,b;
+            cin >> a >> b;
+            cin.ignore();
+            permuteKey(key, toupper(a), toupper(b));
+            string solution = decrypt(ciphertext, key);
+            cout << solution << endl;
+            cout << countMatches(solution, dict) << endl;
+        } else {
+            cout << "Invalid input\n";
+        }
+        getline(cin, input);
+    }
 
     return 0;
 }
