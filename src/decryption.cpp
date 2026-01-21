@@ -88,10 +88,27 @@ size_t countMatches(const string& text, const unordered_set<string>& dict){
 		if(word.size() > text.size()) continue;
 
 		if(text.find(word) != string::npos){
-			++count;
+			count += word.length()*word.length();
 		}
 	}
 	return count;
+}
+
+void autoDecrypt(string& key, string& ciphertext, const unordered_set<string>& dict) {
+    int highScore = countMatches(decrypt(ciphertext, key), dict);
+
+    for (char a = 'A'; a <= 'Z'; a++) {
+        for (char b = 'A'; b <= 'Z'; b++) {
+            if (a == b) continue;
+            permuteKey(key, a, b);
+            int score = countMatches(decrypt(ciphertext, key), dict);
+            if (score > highScore) {
+                highScore = score;
+            } else {
+                permuteKey(key, a, b);
+            }
+        }
+    }
 }
 
 int main() {
@@ -130,24 +147,25 @@ int main() {
     cout << "Initial Score: " << countMatches(solution, dict) << endl;
 
     string input;
-    cout << "1: Swap two letters in the key\n2: Quit\n";
+    cout << "1: Swap two letters in the key\n2: Autosolver\n3: Quit\n";
     getline(cin, input);
-    while (input != "2") {
+    while (input != "3") {
         if (input == "1") {
             cout << "Which characters do you want to swap?\n";
             char a,b;
             cin >> a >> b;
             getline(cin, input);
             permuteKey(key, toupper(a), toupper(b));
-            solution = decrypt(ciphertext, key);
-            cout << "Decrypted text using key: " << key << endl;
-            cout << solution << endl;
-            cout << "Score: " << countMatches(solution, dict) << endl;
+        } else if (input == "2") {
+            autoDecrypt(key, ciphertext, dict);
         } else {
             cout << "Invalid input\n\n";
         }
-        
-        cout << "1: Swap two letters in the key\n2: Quit\n";
+        solution = decrypt(ciphertext, key);
+        cout << "Decrypted text using key: " << key << endl;
+        cout << solution << endl;
+        cout << "Score: " << countMatches(solution, dict) << endl;
+        cout << "1: Swap two letters in the key\n2: Autosolver\n3: Quit\n";
         getline(cin, input);
     }
 
