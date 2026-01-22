@@ -81,27 +81,66 @@ void permuteKey(string& key, char a, char b) {
     }
 }
 
-size_t countMatches(const string& text, const unordered_set<string>& dict){
-	size_t count = 0;
-	for(const auto& word : dict){
-		if(word.empty()) continue;
-		if(word.size() > text.size()) continue;
 
-		if(text.find(word) != string::npos){
-			count++;
+size_t checkSet(const string& text, const unordered_set<string>& dict){
+	string word;
+	size_t count = 0;
+	bool goodBits[text.size()];
+	map<char, int> matchFreq;
+	map<char, int> unmatchedFreq;
+	map<char, int> certaintyMap;
+
+	for(char c = 'A'; c<='Z'; c++){
+		matchFreq.insert({c,0});
+		unmatchedFreq.insert({c,0});
+		certaintyMap.insert({c,0});
+	}
+
+	for (int i = 2; i <= 8; i++){
+		for (int j = 0; j <= text.size()-i; j++){
+			const auto& sub = text.substr(j,i);
+			auto it = dict.find(sub);
+			if (it != dict.end()){
+				for(int k = j; k <= j+i; k++){
+					goodBits[k] = true;
+				}
+				for(char c : sub){
+					matchFreq[c] += i;
+				}
+				count++;
+			}
 		}
 	}
+	for (int i = 0; i<sizeof(goodBits); i++){
+		if (goodBits[i] == true){
+			matchFreq[text[i]]++;
+		} else {
+			unmatchedFreq[text[i]]++;
+		}
+	}
+
+	cout << "Match certainty: " << endl;
+	for (const auto& p : matchFreq){
+		float matchNum = p.second;
+		float unmatchedNum = unmatchedFreq[p.first];
+		float sum = matchNum + unmatchedNum;
+		float certaintyPercent = (matchNum/sum) * 100;
+
+		cout << p.first << ": " << certaintyPercent << "%" << endl;
+	}
+
 	return count;
 }
 
+
 void autoDecrypt(string& key, string& ciphertext, const unordered_set<string>& dict) {
-    int highScore = countMatches(decrypt(ciphertext, key), dict);
+    int highScore = checkSet(decrypt(ciphertext, key), dict);
 
     for (char a = 'A'; a <= 'Z'; a++) {
         for (char b = 'A'; b <= 'Z'; b++) {
             if (a == b) continue;
             permuteKey(key, a, b);
-            int score = countMatches(decrypt(ciphertext, key), dict);
+            int score = checkSet(decrypt(ciphertext, key), dict);
             if (score > highScore) {
                 highScore = score;
             } else {
@@ -110,6 +149,9 @@ void autoDecrypt(string& key, string& ciphertext, const unordered_set<string>& d
         }
     }
 }
+
+
+
 
 int main() {
     unordered_set<string> dict; // the dictionary from dictionary.txt
@@ -139,12 +181,15 @@ int main() {
     for (int i = 0; i < 26; i++) {
         // set the key's alphabetical position of the ith most frequent cipher letter to the ith most frequent common text letter
         key[cipherFreq[i].first - 'A'] = commonTextFreq[i]; 
-    }    
+    }
 
     string solution = decrypt(ciphertext, key);
     cout << "Decrypted text using key: " << key << endl;
     cout << solution << endl;
-    cout << "Initial Score: " << countMatches(solution, dict) << endl;
+    cout << "Initial Score: " << checkSet(solution, dict) << endl;
+
+
+
 
     string input;
     cout << "1: Swap two letters in the key\n2: Autosolver\n3: Quit\n";
@@ -164,7 +209,7 @@ int main() {
         solution = decrypt(ciphertext, key);
         cout << "Decrypted text using key: " << key << endl;
         cout << solution << endl;
-        cout << "Score: " << countMatches(solution, dict) << endl;
+        cout << "Score: " << checkSet(solution, dict) << endl;
         cout << "1: Swap two letters in the key\n2: Autosolver\n3: Quit\n";
         getline(cin, input);
     }
